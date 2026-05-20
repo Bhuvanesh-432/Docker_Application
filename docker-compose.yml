@@ -1,0 +1,71 @@
+version: '3.9'
+
+services:
+
+  # ── Tier 1: MySQL Database ─────────────────────────────────────────────────
+  mysql:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    container_name: greenleaf_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: gardening_db
+      MYSQL_USER: gardenuser
+      MYSQL_PASSWORD: gardenpass
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - greenleaf_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ── Tier 2: Flask Backend API ─────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: greenleaf_backend
+    restart: unless-stopped
+    environment:
+      DB_HOST: mysql
+      DB_USER: gardenuser
+      DB_PASSWORD: gardenpass
+      DB_NAME: gardening_db
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - greenleaf_net
+    expose:
+      - "5000"
+
+  # ── Tier 3: Nginx + Frontend ──────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: greenleaf_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - greenleaf_net
+
+# ── Volumes ───────────────────────────────────────────────────────────────────
+volumes:
+  mysql_data:
+    driver: local
+
+# ── Networks ──────────────────────────────────────────────────────────────────
+networks:
+  greenleaf_net:
+    driver: bridge

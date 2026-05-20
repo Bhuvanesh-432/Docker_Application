@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GreenLeaf Gardens — Company Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --green-deep: #1a3a2a;
+    --green-mid: #2d6a4f;
+    --green-light: #52b788;
+    --green-pale: #b7e4c7;
+    --cream: #f8f5f0;
+    --earth: #8b5e3c;
+    --gold: #d4a843;
+    --text-dark: #1a2018;
+    --text-mid: #4a5568;
+    --white: #ffffff;
+    --shadow: 0 4px 24px rgba(26,58,42,0.12);
+    --radius: 16px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--cream); color:var(--text-dark); min-height:100vh; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    position:fixed; left:0; top:0; bottom:0; width:260px;
+    background:var(--green-deep);
+    display:flex; flex-direction:column;
+    z-index:100; overflow:hidden;
+  }
+  .sidebar::before {
+    content:''; position:absolute; bottom:-80px; left:-40px;
+    width:250px; height:250px; border-radius:50%;
+    background:rgba(82,183,136,0.08);
+    pointer-events:none;
+  }
+  .logo {
+    padding:32px 28px 24px;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .logo-icon { font-size:36px; display:block; margin-bottom:8px; }
+  .logo-text { font-family:'Playfair Display',serif; font-size:22px; color:var(--white); font-weight:700; line-height:1.2; }
+  .logo-sub { font-size:11px; color:var(--green-pale); letter-spacing:2px; text-transform:uppercase; margin-top:4px; }
+
+  nav { flex:1; padding:20px 16px; overflow-y:auto; }
+  .nav-section { margin-bottom:8px; }
+  .nav-label {
+    font-size:10px; letter-spacing:2px; text-transform:uppercase;
+    color:rgba(183,228,199,0.5); padding:8px 12px; margin-bottom:4px;
+  }
+  .nav-item {
+    display:flex; align-items:center; gap:12px;
+    padding:11px 14px; border-radius:10px; cursor:pointer;
+    color:rgba(255,255,255,0.65); font-size:14px; font-weight:500;
+    transition:all 0.2s; margin-bottom:2px;
+  }
+  .nav-item:hover { background:rgba(255,255,255,0.07); color:var(--white); }
+  .nav-item.active { background:var(--green-light); color:var(--white); }
+  .nav-item .icon { font-size:18px; width:22px; text-align:center; }
+
+  .sidebar-footer {
+    padding:20px 24px;
+    border-top:1px solid rgba(255,255,255,0.08);
+    font-size:12px; color:rgba(255,255,255,0.35);
+    text-align:center;
+  }
+
+  /* ── Main ── */
+  .main { margin-left:260px; min-height:100vh; }
+
+  .topbar {
+    background:var(--white); padding:18px 36px;
+    display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid rgba(0,0,0,0.06);
+    box-shadow:0 2px 8px rgba(0,0,0,0.04);
+    position:sticky; top:0; z-index:50;
+  }
+  .page-title { font-family:'Playfair Display',serif; font-size:26px; font-weight:700; color:var(--green-deep); }
+  .topbar-right { display:flex; align-items:center; gap:16px; }
+  .status-dot { width:8px; height:8px; border-radius:50%; background:#22c55e; display:inline-block; }
+  .api-status { font-size:13px; color:var(--text-mid); display:flex; align-items:center; gap:6px; }
+
+  /* ── Content ── */
+  .content { padding:32px 36px; }
+
+  /* ── Stat Cards ── */
+  .stats-grid {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:20px; margin-bottom:32px;
+  }
+  .stat-card {
+    background:var(--white); border-radius:var(--radius);
+    padding:24px; box-shadow:var(--shadow);
+    border-top:4px solid transparent;
+    transition:transform 0.2s;
+    position:relative; overflow:hidden;
+  }
+  .stat-card:hover { transform:translateY(-3px); }
+  .stat-card.green { border-top-color:var(--green-light); }
+  .stat-card.gold { border-top-color:var(--gold); }
+  .stat-card.earth { border-top-color:var(--earth); }
+  .stat-card.deep { border-top-color:var(--green-deep); }
+  .stat-card.blue { border-top-color:#4f9cf9; }
+  .stat-card.pink { border-top-color:#f472b6; }
+  .stat-card-icon { font-size:28px; margin-bottom:12px; }
+  .stat-card-value { font-family:'Playfair Display',serif; font-size:32px; font-weight:900; color:var(--green-deep); line-height:1; }
+  .stat-card-label { font-size:13px; color:var(--text-mid); margin-top:6px; font-weight:500; }
+
+  /* ── Table Section ── */
+  .section-card {
+    background:var(--white); border-radius:var(--radius);
+    box-shadow:var(--shadow); margin-bottom:28px; overflow:hidden;
+  }
+  .section-header {
+    padding:20px 28px; border-bottom:1px solid rgba(0,0,0,0.06);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .section-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; color:var(--green-deep); }
+  .section-subtitle { font-size:13px; color:var(--text-mid); margin-top:2px; }
+
+  table { width:100%; border-collapse:collapse; }
+  thead tr { background:rgba(26,58,42,0.04); }
+  th { padding:12px 20px; text-align:left; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--text-mid); }
+  td { padding:14px 20px; font-size:14px; border-bottom:1px solid rgba(0,0,0,0.04); }
+  tr:last-child td { border-bottom:none; }
+  tbody tr:hover { background:rgba(82,183,136,0.04); }
+
+  .badge {
+    display:inline-block; padding:4px 10px; border-radius:20px;
+    font-size:11px; font-weight:600; text-transform:capitalize;
+  }
+  .badge-delivered, .badge-completed { background:#dcfce7; color:#166534; }
+  .badge-shipped, .badge-in_progress { background:#dbeafe; color:#1d4ed8; }
+  .badge-processing, .badge-planning { background:#fef9c3; color:#854d0e; }
+  .badge-pending, .badge-on_hold { background:#fee2e2; color:#991b1b; }
+
+  /* ── Forms ── */
+  .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; padding:24px 28px; }
+  .form-group { display:flex; flex-direction:column; gap:6px; }
+  .form-group label { font-size:12px; font-weight:600; color:var(--text-mid); letter-spacing:0.5px; text-transform:uppercase; }
+  .form-group input, .form-group select, .form-group textarea {
+    padding:10px 14px; border:1.5px solid rgba(0,0,0,0.1); border-radius:8px;
+    font-size:14px; font-family:'DM Sans',sans-serif;
+    transition:border-color 0.2s; outline:none; background:var(--cream);
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color:var(--green-light); background:var(--white);
+  }
+  .form-actions { padding:0 28px 24px; display:flex; gap:12px; }
+  .btn {
+    padding:10px 22px; border:none; border-radius:8px; cursor:pointer;
+    font-size:14px; font-weight:600; font-family:'DM Sans',sans-serif;
+    transition:all 0.2s;
+  }
+  .btn-primary { background:var(--green-mid); color:var(--white); }
+  .btn-primary:hover { background:var(--green-deep); transform:translateY(-1px); }
+  .btn-danger { background:#fee2e2; color:#991b1b; }
+  .btn-danger:hover { background:#fecaca; }
+
+  /* ── Loading / Empty ── */
+  .loading { text-align:center; padding:48px; color:var(--text-mid); }
+  .spinner { width:36px; height:36px; border:3px solid var(--green-pale); border-top-color:var(--green-mid); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 12px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* ── Toast ── */
+  .toast {
+    position:fixed; bottom:24px; right:24px;
+    background:var(--green-deep); color:var(--white);
+    padding:14px 22px; border-radius:10px; font-size:14px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.2);
+    transform:translateY(80px); opacity:0;
+    transition:all 0.35s cubic-bezier(.34,1.56,.64,1);
+    z-index:999;
+  }
+  .toast.show { transform:translateY(0); opacity:1; }
+
+  /* ── Page visibility ── */
+  .page { display:none; }
+  .page.active { display:block; }
+
+  /* ── Revenue highlight ── */
+  .revenue-large {
+    font-family:'Playfair Display',serif;
+    font-size:40px; font-weight:900;
+    color:var(--green-mid); line-height:1;
+  }
+
+  /* ── Category pills ── */
+  .cat-pill {
+    display:inline-block; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:500;
+    background:rgba(82,183,136,0.12); color:var(--green-mid);
+  }
+
+  /* ── Responsive ── */
+  @media(max-width:768px) {
+    .sidebar { width:200px; }
+    .main { margin-left:200px; }
+    .content { padding:20px; }
+    .topbar { padding:14px 20px; }
+    .stats-grid { grid-template-columns:1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">
+    <span class="logo-icon">🌿</span>
+    <div class="logo-text">GreenLeaf<br>Gardens</div>
+    <div class="logo-sub">Company Portal</div>
+  </div>
+  <nav>
+    <div class="nav-section">
+      <div class="nav-label">Overview</div>
+      <div class="nav-item active" onclick="navigate('dashboard',this)">
+        <span class="icon">📊</span> Dashboard
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Business</div>
+      <div class="nav-item" onclick="navigate('products',this)">
+        <span class="icon">🌱</span> Products
+      </div>
+      <div class="nav-item" onclick="navigate('customers',this)">
+        <span class="icon">👥</span> Customers
+      </div>
+      <div class="nav-item" onclick="navigate('orders',this)">
+        <span class="icon">📦</span> Orders
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Company</div>
+      <div class="nav-item" onclick="navigate('employees',this)">
+        <span class="icon">🧑‍🌾</span> Employees
+      </div>
+      <div class="nav-item" onclick="navigate('projects',this)">
+        <span class="icon">🏡</span> Projects
+      </div>
+    </div>
+  </nav>
+  <div class="sidebar-footer">GreenLeaf v1.0 · Docker Edition</div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div class="page-title" id="pageTitle">Dashboard</div>
+    <div class="topbar-right">
+      <div class="api-status"><span class="status-dot" id="statusDot"></span><span id="statusText">Connecting…</span></div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid" id="statsGrid">
+        <div class="loading"><div class="spinner"></div>Loading…</div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="page" id="page-products">
+      <div class="section-card" style="margin-bottom:24px">
+        <div class="section-header">
+          <div><div class="section-title">Add New Product</div><div class="section-subtitle">Add to nursery inventory</div></div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group"><label>Product Name*</label><input id="p-name" placeholder="e.g. Fern Deluxe"/></div>
+          <div class="form-group"><label>Category*</label>
+            <select id="p-cat">
+              <option>Flowers</option><option>Herbs</option><option>Vegetables</option>
+              <option>Seeds</option><option>Tools</option><option>Soil &amp; Compost</option>
+              <option>Pots &amp; Planters</option><option>Irrigation</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Price (₹)*</label><input id="p-price" type="number" placeholder="0.00"/></div>
+          <div class="form-group"><label>Stock Qty</label><input id="p-stock" type="number" placeholder="0"/></div>
+          <div class="form-group" style="grid-column:1/-1"><label>Description</label><textarea id="p-desc" rows="2" placeholder="Brief description…"></textarea></div>
+        </div>
+        <div class="form-actions"><button class="btn btn-primary" onclick="addProduct()">➕ Add Product</button></div>
+      </div>
+      <div class="section-card">
+        <div class="section-header">
+          <div><div class="section-title">🌱 Products Inventory</div><div class="section-subtitle" id="products-count">Loading…</div></div>
+        </div>
+        <div id="products-table"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- CUSTOMERS -->
+    <div class="page" id="page-customers">
+      <div class="section-card" style="margin-bottom:24px">
+        <div class="section-header"><div><div class="section-title">Add New Customer</div></div></div>
+        <div class="form-grid">
+          <div class="form-group"><label>Full Name*</label><input id="c-name" placeholder="Customer name"/></div>
+          <div class="form-group"><label>Email*</label><input id="c-email" type="email" placeholder="email@example.com"/></div>
+          <div class="form-group"><label>Phone</label><input id="c-phone" placeholder="Mobile number"/></div>
+          <div class="form-group"><label>Address</label><input id="c-addr" placeholder="Full address"/></div>
+        </div>
+        <div class="form-actions"><button class="btn btn-primary" onclick="addCustomer()">➕ Add Customer</button></div>
+      </div>
+      <div class="section-card">
+        <div class="section-header">
+          <div><div class="section-title">👥 Customer Directory</div><div class="section-subtitle" id="customers-count">Loading…</div></div>
+        </div>
+        <div id="customers-table"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="page" id="page-orders">
+      <div class="section-card">
+        <div class="section-header">
+          <div><div class="section-title">📦 Order Management</div><div class="section-subtitle" id="orders-count">Loading…</div></div>
+        </div>
+        <div id="orders-table"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- EMPLOYEES -->
+    <div class="page" id="page-employees">
+      <div class="section-card" style="margin-bottom:24px">
+        <div class="section-header"><div><div class="section-title">Add New Employee</div></div></div>
+        <div class="form-grid">
+          <div class="form-group"><label>Full Name*</label><input id="e-name" placeholder="Employee name"/></div>
+          <div class="form-group"><label>Role*</label><input id="e-role" placeholder="e.g. Landscape Designer"/></div>
+          <div class="form-group"><label>Department</label>
+            <select id="e-dept">
+              <option>Operations</option><option>Design</option><option>Sales</option>
+              <option>Support</option><option>Finance</option><option>Management</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Email*</label><input id="e-email" type="email" placeholder="work@email.com"/></div>
+          <div class="form-group"><label>Phone</label><input id="e-phone" placeholder="Mobile"/></div>
+          <div class="form-group"><label>Hire Date</label><input id="e-hdate" type="date"/></div>
+          <div class="form-group"><label>Salary (₹/yr)</label><input id="e-sal" type="number" placeholder="0"/></div>
+        </div>
+        <div class="form-actions"><button class="btn btn-primary" onclick="addEmployee()">➕ Add Employee</button></div>
+      </div>
+      <div class="section-card">
+        <div class="section-header">
+          <div><div class="section-title">🧑‍🌾 Employee Directory</div><div class="section-subtitle" id="employees-count">Loading…</div></div>
+        </div>
+        <div id="employees-table"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="page" id="page-projects">
+      <div class="section-card" style="margin-bottom:24px">
+        <div class="section-header"><div><div class="section-title">New Garden Project</div></div></div>
+        <div class="form-grid">
+          <div class="form-group" style="grid-column:1/-1"><label>Project Title*</label><input id="pr-title" placeholder="e.g. Rooftop Kitchen Garden"/></div>
+          <div class="form-group"><label>Project Type</label>
+            <select id="pr-type">
+              <option>Rooftop Garden</option><option>Lawn Care</option><option>Kitchen Garden</option>
+              <option>Container Garden</option><option>Commercial</option><option>Irrigation</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Status</label>
+            <select id="pr-status"><option value="planning">Planning</option><option value="in_progress">In Progress</option><option value="completed">Completed</option><option value="on_hold">On Hold</option></select>
+          </div>
+          <div class="form-group"><label>Start Date</label><input id="pr-start" type="date"/></div>
+          <div class="form-group"><label>End Date</label><input id="pr-end" type="date"/></div>
+          <div class="form-group"><label>Budget (₹)</label><input id="pr-budget" type="number" placeholder="0"/></div>
+          <div class="form-group" style="grid-column:1/-1"><label>Description</label><textarea id="pr-desc" rows="2" placeholder="Project overview…"></textarea></div>
+        </div>
+        <div class="form-actions"><button class="btn btn-primary" onclick="addProject()">➕ Create Project</button></div>
+      </div>
+      <div class="section-card">
+        <div class="section-header">
+          <div><div class="section-title">🏡 Garden Projects</div><div class="section-subtitle" id="projects-count">Loading…</div></div>
+        </div>
+        <div id="projects-table"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+
+// ── Navigation ───────────────────────────────────────────────────────────────
+function navigate(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  el.classList.add('active');
+  const titles = {dashboard:'Dashboard',products:'Products',customers:'Customers',orders:'Orders',employees:'Employees',projects:'Projects'};
+  document.getElementById('pageTitle').textContent = titles[page];
+  loaders[page]();
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── API Helper ────────────────────────────────────────────────────────────────
+async function api(path, method='GET', body=null) {
+  const opts = { method, headers:{'Content-Type':'application/json'} };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(API + path, opts);
+  return r.json();
+}
+
+// ── Health ────────────────────────────────────────────────────────────────────
+async function checkHealth() {
+  try {
+    const d = await api('/health');
+    const dot = document.getElementById('statusDot');
+    const txt = document.getElementById('statusText');
+    if (d.status === 'ok') {
+      dot.style.background = '#22c55e'; txt.textContent = 'DB Connected';
+    } else {
+      dot.style.background = '#ef4444'; txt.textContent = 'DB Error';
+    }
+  } catch { document.getElementById('statusDot').style.background='#f97316'; document.getElementById('statusText').textContent='Backend Offline'; }
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const d = await api('/dashboard');
+    const g = document.getElementById('statsGrid');
+    g.innerHTML = `
+      <div class="stat-card green"><div class="stat-card-icon">🌱</div><div class="stat-card-value">${d.total_products}</div><div class="stat-card-label">Total Products</div></div>
+      <div class="stat-card gold"><div class="stat-card-icon">👥</div><div class="stat-card-value">${d.total_customers}</div><div class="stat-card-label">Customers</div></div>
+      <div class="stat-card earth"><div class="stat-card-icon">📦</div><div class="stat-card-value">${d.total_orders}</div><div class="stat-card-label">Orders</div></div>
+      <div class="stat-card deep"><div class="stat-card-icon">🧑‍🌾</div><div class="stat-card-value">${d.total_employees}</div><div class="stat-card-label">Employees</div></div>
+      <div class="stat-card blue"><div class="stat-card-icon">🏡</div><div class="stat-card-value">${d.active_projects}</div><div class="stat-card-label">Active Projects</div></div>
+      <div class="stat-card pink"><div class="stat-card-icon">💰</div><div class="revenue-large">₹${(d.total_revenue/1000).toFixed(1)}K</div><div class="stat-card-label">Revenue Delivered</div></div>
+    `;
+  } catch(e) {
+    document.getElementById('statsGrid').innerHTML = '<div class="loading">⚠️ Could not load dashboard. Is the backend running?</div>';
+  }
+}
+
+// ── Products ──────────────────────────────────────────────────────────────────
+async function loadProducts() {
+  try {
+    const data = await api('/products');
+    document.getElementById('products-count').textContent = data.length + ' products in inventory';
+    const rows = data.map(p => `
+      <tr>
+        <td><strong>${p.name}</strong></td>
+        <td><span class="cat-pill">${p.category}</span></td>
+        <td>₹${parseFloat(p.price).toFixed(2)}</td>
+        <td>${p.stock}</td>
+        <td style="max-width:240px;color:var(--text-mid);font-size:13px">${p.description||'—'}</td>
+        <td><button class="btn btn-danger" onclick="deleteProduct(${p.id})">Delete</button></td>
+      </tr>`).join('');
+    document.getElementById('products-table').innerHTML = `
+      <table><thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Description</th><th>Action</th></tr></thead>
+      <tbody>${rows}</tbody></table>`;
+  } catch { document.getElementById('products-table').innerHTML='<div class="loading">⚠️ Failed to load</div>'; }
+}
+
+async function addProduct() {
+  const name=document.getElementById('p-name').value.trim();
+  const category=document.getElementById('p-cat').value;
+  const price=document.getElementById('p-price').value;
+  const stock=document.getElementById('p-stock').value||0;
+  const description=document.getElementById('p-desc').value;
+  if(!name||!price){ toast('⚠️ Name and Price required'); return; }
+  await api('/products','POST',{name,category,price,stock,description});
+  toast('🌱 Product added!');
+  ['p-name','p-price','p-stock','p-desc'].forEach(id=>document.getElementById(id).value='');
+  loadProducts();
+}
+
+async function deleteProduct(id) {
+  if(!confirm('Delete this product?')) return;
+  await api('/products/'+id,'DELETE');
+  toast('🗑️ Product deleted'); loadProducts();
+}
+
+// ── Customers ────────────────────────────────────────────────────────────────
+async function loadCustomers() {
+  try {
+    const data = await api('/customers');
+    document.getElementById('customers-count').textContent = data.length + ' registered customers';
+    const rows = data.map(c => `
+      <tr>
+        <td><strong>${c.name}</strong></td>
+        <td>${c.email}</td>
+        <td>${c.phone||'—'}</td>
+        <td style="color:var(--text-mid);font-size:13px">${c.address||'—'}</td>
+        <td style="font-size:12px;color:var(--text-mid)">${c.created_at?c.created_at.split(' ')[0]:'—'}</td>
+      </tr>`).join('');
+    document.getElementById('customers-table').innerHTML = `
+      <table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Address</th><th>Joined</th></tr></thead>
+      <tbody>${rows}</tbody></table>`;
+  } catch { document.getElementById('customers-table').innerHTML='<div class="loading">⚠️ Failed to load</div>'; }
+}
+
+async function addCustomer() {
+  const name=document.getElementById('c-name').value.trim();
+  const email=document.getElementById('c-email').value.trim();
+  const phone=document.getElementById('c-phone').value.trim();
+  const address=document.getElementById('c-addr').value.trim();
+  if(!name||!email){ toast('⚠️ Name and Email required'); return; }
+  await api('/customers','POST',{name,email,phone,address});
+  toast('👥 Customer added!');
+  ['c-name','c-email','c-phone','c-addr'].forEach(id=>document.getElementById(id).value='');
+  loadCustomers();
+}
+
+// ── Orders ────────────────────────────────────────────────────────────────────
+async function loadOrders() {
+  try {
+    const data = await api('/orders');
+    document.getElementById('orders-count').textContent = data.length + ' total orders';
+    const rows = data.map(o => `
+      <tr>
+        <td>#${o.id}</td>
+        <td>${o.customer_name||'Guest'}</td>
+        <td>₹${parseFloat(o.total_amount).toFixed(2)}</td>
+        <td><span class="badge badge-${o.status}">${o.status}</span></td>
+        <td style="font-size:13px;color:var(--text-mid)">${o.order_date?o.order_date.split(' ')[0]:'—'}</td>
+      </tr>`).join('');
+    document.getElementById('orders-table').innerHTML = `
+      <table><thead><tr><th>Order #</th><th>Customer</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>${rows}</tbody></table>`;
+  } catch { document.getElementById('orders-table').innerHTML='<div class="loading">⚠️ Failed to load</div>'; }
+}
+
+// ── Employees ────────────────────────────────────────────────────────────────
+async function loadEmployees() {
+  try {
+    const data = await api('/employees');
+    document.getElementById('employees-count').textContent = data.length + ' team members';
+    const rows = data.map(e => `
+      <tr>
+        <td><strong>${e.name}</strong></td>
+        <td>${e.role}</td>
+        <td><span class="cat-pill">${e.department}</span></td>
+        <td>${e.email}</td>
+        <td>${e.phone||'—'}</td>
+        <td style="font-size:13px">${e.hire_date||'—'}</td>
+        <td>₹${e.salary?parseFloat(e.salary).toLocaleString('en-IN'):'—'}</td>
+      </tr>`).join('');
+    document.getElementById('employees-table').innerHTML = `
+      <table><thead><tr><th>Name</th><th>Role</th><th>Dept</th><th>Email</th><th>Phone</th><th>Hired</th><th>Salary/yr</th></tr></thead>
+      <tbody>${rows}</tbody></table>`;
+  } catch { document.getElementById('employees-table').innerHTML='<div class="loading">⚠️ Failed to load</div>'; }
+}
+
+async function addEmployee() {
+  const name=document.getElementById('e-name').value.trim();
+  const role=document.getElementById('e-role').value.trim();
+  const department=document.getElementById('e-dept').value;
+  const email=document.getElementById('e-email').value.trim();
+  const phone=document.getElementById('e-phone').value.trim();
+  const hire_date=document.getElementById('e-hdate').value;
+  const salary=document.getElementById('e-sal').value;
+  if(!name||!role||!email){ toast('⚠️ Name, Role and Email required'); return; }
+  await api('/employees','POST',{name,role,department,email,phone,hire_date,salary});
+  toast('🧑‍🌾 Employee added!');
+  ['e-name','e-role','e-email','e-phone','e-hdate','e-sal'].forEach(id=>document.getElementById(id).value='');
+  loadEmployees();
+}
+
+// ── Projects ──────────────────────────────────────────────────────────────────
+async function loadProjects() {
+  try {
+    const data = await api('/projects');
+    document.getElementById('projects-count').textContent = data.length + ' garden projects';
+    const rows = data.map(p => `
+      <tr>
+        <td><strong>${p.title}</strong></td>
+        <td>${p.project_type||'—'}</td>
+        <td>${p.customer_name||'—'}</td>
+        <td>${p.employee_name||'—'}</td>
+        <td><span class="badge badge-${p.status}">${p.status.replace('_',' ')}</span></td>
+        <td style="font-size:12px">${p.start_date||'—'}</td>
+        <td>₹${p.budget?parseFloat(p.budget).toLocaleString('en-IN'):'—'}</td>
+      </tr>`).join('');
+    document.getElementById('projects-table').innerHTML = `
+      <table><thead><tr><th>Title</th><th>Type</th><th>Customer</th><th>Lead</th><th>Status</th><th>Start</th><th>Budget</th></tr></thead>
+      <tbody>${rows}</tbody></table>`;
+  } catch { document.getElementById('projects-table').innerHTML='<div class="loading">⚠️ Failed to load</div>'; }
+}
+
+async function addProject() {
+  const title=document.getElementById('pr-title').value.trim();
+  const project_type=document.getElementById('pr-type').value;
+  const status=document.getElementById('pr-status').value;
+  const start_date=document.getElementById('pr-start').value;
+  const end_date=document.getElementById('pr-end').value;
+  const budget=document.getElementById('pr-budget').value;
+  const description=document.getElementById('pr-desc').value;
+  if(!title){ toast('⚠️ Project title required'); return; }
+  await api('/projects','POST',{title,project_type,status,start_date,end_date,budget,description});
+  toast('🏡 Project created!');
+  ['pr-title','pr-start','pr-end','pr-budget','pr-desc'].forEach(id=>document.getElementById(id).value='');
+  loadProjects();
+}
+
+// ── Page loaders map ──────────────────────────────────────────────────────────
+const loaders = {
+  dashboard: loadDashboard,
+  products: loadProducts,
+  customers: loadCustomers,
+  orders: loadOrders,
+  employees: loadEmployees,
+  projects: loadProjects,
+};
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+checkHealth();
+loadDashboard();
+</script>
+</body>
+</html>
