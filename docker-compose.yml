@@ -2,8 +2,8 @@ version: '3.9'
 
 services:
 
+  # ── Tier 1: MySQL Database ─────────────────────────────────────────────────
   mysql:
-    image: greenleaf-mysql:latest
     build:
       context: ./mysql
       dockerfile: Dockerfile
@@ -26,8 +26,8 @@ services:
       retries: 10
       start_period: 30s
 
+  # ── Tier 2: Flask Backend API ─────────────────────────────────────────────
   backend:
-    image: greenleaf-backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -46,8 +46,8 @@ services:
     expose:
       - "5000"
 
+  # ── Tier 3: Nginx + Frontend ──────────────────────────────────────────────
   frontend:
-    image: greenleaf-frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -60,10 +60,13 @@ services:
     networks:
       - greenleaf_net
 
+# ── Volumes ───────────────────────────────────────────────────────────────────
 volumes:
   mysql_data:
     driver: local
 
+# ── Networks ──────────────────────────────────────────────────────────────────
 networks:
   greenleaf_net:
     driver: bridge
+
