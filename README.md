@@ -1,138 +1,298 @@
-# 🌿 GreenLeaf Gardens — Dockerised 3-Tier Application
+# 🌿 GreenLeaf Gardens — Dockerized 3-Tier Application with Kubernetes
 
-A fully containerised **Company Management Portal** for a Gardening Business.
+A fully containerized Company Management Portal for a Gardening Business, built using **Docker, Kubernetes, MySQL, Flask, Nginx, and AWS ECR**.
 
-## Architecture
+---
 
+## 📌 Project Overview
+
+GreenLeaf Gardens is a modern 3-tier web application designed for managing gardening products, customers, orders, employees, and landscaping projects.
+
+The application follows a microservices-based architecture:
+
+* **Frontend:** Nginx + HTML/CSS/JavaScript
+* **Backend:** Python Flask REST API
+* **Database:** MySQL 8.0
+* **Containerization:** Docker
+* **Container Registry:** AWS ECR
+* **Orchestration:** Kubernetes
+
+---
+
+## 🏗️ Architecture
+
+```text
+                    ┌──────────────────┐
+                    │    Frontend      │
+                    │ Nginx + HTML/CSS │
+                    │    Port : 80     │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │ Flask Backend API│
+                    │    Port : 5000   │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │    MySQL 8.0     │
+                    │    Port : 3306   │
+                    └──────────────────┘
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Ubuntu EC2 Instance                       │
-│                                                             │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐  │
-│  │   TIER 1     │    │   TIER 2     │    │   TIER 3     │  │
-│  │   MySQL 8.0  │◄───│   Flask API  │◄───│  Nginx +     │  │
-│  │  Port: 3306  │    │  Port: 5000  │    │  HTML/CSS/JS │  │
-│  │  (internal)  │    │  (internal)  │    │  Port: 80 ✅  │  │
-│  └──────────────┘    └──────────────┘    └──────────────┘  │
-│                                                             │
-│                   Docker Bridge Network                     │
-└─────────────────────────────────────────────────────────────┘
+
+---
+
+## ☸️ Kubernetes Architecture
+
+```text
+Kubernetes Cluster
+│
+├── MySQL Deployment
+│   ├── MySQL Pod
+│   ├── Persistent Volume Claim
+│   └── MySQL Service
+│
+├── Backend Deployment
+│   ├── Flask API Pods
+│   └── Backend Service
+│
+└── Frontend Deployment
+    ├── Nginx Pods
+    └── LoadBalancer Service
 ```
 
-## Features
+---
 
-- 📊 **Dashboard** — Live stats: products, customers, orders, revenue, active projects
-- 🌱 **Products** — Inventory management with CRUD operations
-- 👥 **Customers** — Customer directory with contact details
-- 📦 **Orders** — Order tracking with status badges
-- 🧑‍🌾 **Employees** — Staff directory by department
-- 🏡 **Garden Projects** — Project lifecycle management
+## 🚀 Features
 
-## Quick Start on Ubuntu EC2
+### 📊 Dashboard
 
-### 1. Install Docker & Docker Compose
+* Live business statistics
+* Revenue tracking
+* Product inventory overview
+* Customer insights
 
-```bash
-sudo apt-get update
-sudo apt-get install -y docker.io docker-compose-plugin
-sudo systemctl start docker
-sudo systemctl enable docker
-sudo usermod -aG docker $USER
-newgrp docker
-```
+### 🌱 Products
 
-### 2. Clone the Repository
+* Add products
+* View inventory
+* Delete products
+
+### 👥 Customers
+
+* Customer management
+* Contact information tracking
+
+### 📦 Orders
+
+* Order management
+* Order status tracking
+
+### 🧑‍🌾 Employees
+
+* Employee directory
+* Department management
+
+### 🏡 Garden Projects
+
+* Landscaping project tracking
+* Project lifecycle monitoring
+
+---
+
+## 🐳 Docker Deployment
+
+### Clone Repository
 
 ```bash
 git clone https://github.com/Bhuvanesh-432/Docker_Application.git
+
 cd Docker_Application
 ```
 
-### 3. Build & Run
+### Build and Run Containers
 
 ```bash
 docker compose up --build -d
 ```
 
-### 4. Access the Application
-
-Open your browser: `http://<EC2-PUBLIC-IP>`
-
-> ⚠️ Make sure **port 80** is open in your EC2 Security Group (Inbound Rule: HTTP).
-
----
-
-## Useful Commands
+### Verify Containers
 
 ```bash
-# View running containers
-docker compose ps
-
-# View logs
-docker compose logs -f
-
-# View specific service logs
-docker compose logs -f backend
-docker compose logs -f mysql
-
-# Stop all services
-docker compose down
-
-# Stop and remove volumes (resets DB)
-docker compose down -v
-
-# Rebuild a specific service
-docker compose up --build backend -d
-
-# Access MySQL directly
-docker exec -it greenleaf_mysql mysql -u gardenuser -pgardenpass gardening_db
+docker ps
 ```
 
-## Project Structure
+### Access Application
 
+```text
+http://<SERVER-IP>
 ```
-Docker_Application/
-├── docker-compose.yml          # Orchestrates all 3 tiers
-├── .gitignore
-├── README.md
-│
-├── mysql/                      # TIER 1 — Database
-│   ├── Dockerfile
-│   └── init.sql                # Schema + seed data
-│
-├── backend/                    # TIER 2 — Flask REST API
-│   ├── Dockerfile
-│   ├── app.py
-│   └── requirements.txt
-│
-└── frontend/                   # TIER 3 — Nginx + HTML
-    ├── Dockerfile
-    ├── nginx.conf              # Reverse proxy to backend
-    └── index.html              # Full SPA dashboard
-```
-
-## API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/health` | Health check |
-| GET | `/api/dashboard` | Dashboard stats |
-| GET/POST | `/api/products` | Products list / add |
-| DELETE | `/api/products/:id` | Delete product |
-| GET/POST | `/api/customers` | Customers list / add |
-| GET/POST | `/api/employees` | Employees list / add |
-| GET | `/api/orders` | Orders with customer names |
-| GET/POST | `/api/projects` | Garden projects |
-
-## Database Schema
-
-- `products` — Inventory items (flowers, tools, soil, etc.)
-- `customers` — Customer directory
-- `orders` — Customer orders with status
-- `order_items` — Line items per order
-- `employees` — Staff with roles and departments
-- `garden_projects` — Landscaping/garden project tracking
 
 ---
 
-Built with 🐍 Python (Flask) + 🐬 MySQL + 🐳 Docker
+## 📦 AWS ECR Deployment
+
+### Login to ECR
+
+```bash
+aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 821263771829.dkr.ecr.eu-north-1.amazonaws.com
+```
+
+### Build Images
+
+```bash
+docker build -t greenleaf-frontend ./frontend
+
+docker build -t greenleaf-backend ./backend
+
+docker build -t greenleaf-mysql ./mysql
+```
+
+### Push Images
+
+```bash
+docker push 821263771829.dkr.ecr.eu-north-1.amazonaws.com/greenleaf-frontend:latest
+
+docker push 821263771829.dkr.ecr.eu-north-1.amazonaws.com/greenleaf-backend:latest
+
+docker push 821263771829.dkr.ecr.eu-north-1.amazonaws.com/greenleaf-mysql:latest
+```
+
+---
+
+## ☸️ Kubernetes Deployment
+
+### Deploy Resources
+
+```bash
+kubectl apply -f kubernetes/mysql-secret.yaml
+
+kubectl apply -f kubernetes/mysql-pvc.yaml
+
+kubectl apply -f kubernetes/mysql-deployment.yaml
+
+kubectl apply -f kubernetes/mysql-service.yaml
+
+kubectl apply -f kubernetes/backend-deployment.yaml
+
+kubectl apply -f kubernetes/backend-service.yaml
+
+kubectl apply -f kubernetes/frontend-deployment.yaml
+
+kubectl apply -f kubernetes/frontend-service.yaml
+```
+
+### Verify Deployment
+
+```bash
+kubectl get pods
+
+kubectl get services
+
+kubectl get deployments
+```
+
+---
+
+## 📂 Project Structure
+
+```text
+Docker_Application/
+│
+├── frontend/
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   ├── index.html
+│   ├── style.css
+│   └── script.js
+│
+├── backend/
+│   ├── Dockerfile
+│   ├── app.py
+│   ├── database.py
+│   └── requirements.txt
+│
+├── mysql/
+│   ├── Dockerfile
+│   └── init.sql
+│
+├── kubernetes/
+│   ├── mysql-secret.yaml
+│   ├── mysql-pvc.yaml
+│   ├── mysql-deployment.yaml
+│   ├── mysql-service.yaml
+│   ├── backend-deployment.yaml
+│   ├── backend-service.yaml
+│   ├── frontend-deployment.yaml
+│   └── frontend-service.yaml
+│
+├── docker-compose.yml
+├── README.md
+└── .gitignore
+```
+
+---
+
+## 🔗 API Endpoints
+
+| Method   | Endpoint       | Description            |
+| -------- | -------------- | ---------------------- |
+| GET      | /api/health    | Health Check           |
+| GET      | /api/dashboard | Dashboard Statistics   |
+| GET/POST | /api/products  | Manage Products        |
+| GET/POST | /api/customers | Manage Customers       |
+| GET/POST | /api/employees | Manage Employees       |
+| GET      | /api/orders    | View Orders            |
+| GET/POST | /api/projects  | Manage Garden Projects |
+
+---
+
+## 🗄️ Database Tables
+
+* products
+* customers
+* orders
+* order_items
+* employees
+* garden_projects
+
+---
+
+## 🛠️ Technology Stack
+
+| Component        | Technology                   |
+| ---------------- | ---------------------------- |
+| Frontend         | HTML, CSS, JavaScript, Nginx |
+| Backend          | Python Flask                 |
+| Database         | MySQL 8.0                    |
+| Containerization | Docker                       |
+| Orchestration    | Kubernetes                   |
+| Registry         | AWS ECR                      |
+| Version Control  | Git & GitHub                 |
+
+---
+
+## 📚 Learning Outcomes
+
+* Docker Image Creation
+* Multi-Container Applications
+* Docker Compose
+* AWS Elastic Container Registry (ECR)
+* Kubernetes Deployments
+* Kubernetes Services
+* Persistent Volumes
+* Secrets Management
+* Container Networking
+
+---
+
+### 👨‍💻 Author
+
+Bhuvanesh Thangaraj
+
+GitHub: https://github.com/Bhuvanesh-432
+
+---
+
+Built with ❤️ using Docker, Kubernetes, Flask, MySQL, and AWS ECR.
