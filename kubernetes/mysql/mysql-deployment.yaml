@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: mysql
+  namespace: greenleaf
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: mysql
+
+  template:
+    metadata:
+      labels:
+        app: mysql
+
+    spec:
+      containers:
+      - name: mysql
+
+        image: <YOUR-ECR-URL>/greenleaf-mysql:latest
+
+        ports:
+        - containerPort: 3306
+
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: root123
+
+        volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+
+      volumes:
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName: mysql-pvc
