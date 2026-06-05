@@ -1,138 +1,235 @@
-# 🌿 GreenLeaf Gardens — Dockerised 3-Tier Application
+# 🌱 GreenLeaf Gardens - 3 Tier Application Deployment on AWS EKS
 
-A fully containerised **Company Management Portal** for a Gardening Business.
+## Project Overview
 
-## Architecture
+GreenLeaf Gardens is a 3-tier containerized web application deployed on Amazon EKS using Kubernetes.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Ubuntu EC2 Instance                       │
-│                                                             │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐  │
-│  │   TIER 1     │    │   TIER 2     │    │   TIER 3     │  │
-│  │   MySQL 8.0  │◄───│   Flask API  │◄───│  Nginx +     │  │
-│  │  Port: 3306  │    │  Port: 5000  │    │  HTML/CSS/JS │  │
-│  │  (internal)  │    │  (internal)  │    │  Port: 80 ✅  │  │
-│  └──────────────┘    └──────────────┘    └──────────────┘  │
-│                                                             │
-│                   Docker Bridge Network                     │
-└─────────────────────────────────────────────────────────────┘
-```
+Architecture:
 
-## Features
-
-- 📊 **Dashboard** — Live stats: products, customers, orders, revenue, active projects
-- 🌱 **Products** — Inventory management with CRUD operations
-- 👥 **Customers** — Customer directory with contact details
-- 📦 **Orders** — Order tracking with status badges
-- 🧑‍🌾 **Employees** — Staff directory by department
-- 🏡 **Garden Projects** — Project lifecycle management
-
-## Quick Start on Ubuntu EC2
-
-### 1. Install Docker & Docker Compose
-
-```bash
-sudo apt-get update
-sudo apt-get install -y docker.io docker-compose-plugin
-sudo systemctl start docker
-sudo systemctl enable docker
-sudo usermod -aG docker $USER
-newgrp docker
-```
-
-### 2. Clone the Repository
-
-```bash
-git clone https://github.com/Bhuvanesh-432/Docker_Application.git
-cd Docker_Application
-```
-
-### 3. Build & Run
-
-```bash
-docker compose up --build -d
-```
-
-### 4. Access the Application
-
-Open your browser: `http://<EC2-PUBLIC-IP>`
-
-> ⚠️ Make sure **port 80** is open in your EC2 Security Group (Inbound Rule: HTTP).
+Frontend (Nginx)
+↓
+Backend (Flask API)
+↓
+MySQL Database
 
 ---
 
-## Useful Commands
+## Technologies Used
 
-```bash
-# View running containers
-docker compose ps
+- AWS EC2
+- AWS EKS
+- AWS ECR
+- AWS EBS CSI Driver
+- Docker
+- Kubernetes
+- Nginx
+- Python Flask
+- MySQL
+- eksctl
+- kubectl
 
-# View logs
-docker compose logs -f
-
-# View specific service logs
-docker compose logs -f backend
-docker compose logs -f mysql
-
-# Stop all services
-docker compose down
-
-# Stop and remove volumes (resets DB)
-docker compose down -v
-
-# Rebuild a specific service
-docker compose up --build backend -d
-
-# Access MySQL directly
-docker exec -it greenleaf_mysql mysql -u gardenuser -pgardenpass gardening_db
-```
+---
 
 ## Project Structure
 
-```
 Docker_Application/
-├── docker-compose.yml          # Orchestrates all 3 tiers
-├── .gitignore
-├── README.md
-│
-├── mysql/                      # TIER 1 — Database
-│   ├── Dockerfile
-│   └── init.sql                # Schema + seed data
-│
-├── backend/                    # TIER 2 — Flask REST API
-│   ├── Dockerfile
-│   ├── app.py
-│   └── requirements.txt
-│
-└── frontend/                   # TIER 3 — Nginx + HTML
-    ├── Dockerfile
-    ├── nginx.conf              # Reverse proxy to backend
-    └── index.html              # Full SPA dashboard
-```
 
-## API Endpoints
+├── backend/
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/health` | Health check |
-| GET | `/api/dashboard` | Dashboard stats |
-| GET/POST | `/api/products` | Products list / add |
-| DELETE | `/api/products/:id` | Delete product |
-| GET/POST | `/api/customers` | Customers list / add |
-| GET/POST | `/api/employees` | Employees list / add |
-| GET | `/api/orders` | Orders with customer names |
-| GET/POST | `/api/projects` | Garden projects |
+│ ├── Dockerfile
 
-## Database Schema
+│ ├── app.py
 
-- `products` — Inventory items (flowers, tools, soil, etc.)
-- `customers` — Customer directory
-- `orders` — Customer orders with status
-- `order_items` — Line items per order
-- `employees` — Staff with roles and departments
-- `garden_projects` — Landscaping/garden project tracking
+│ └── requirements.txt
+
+├── frontend/
+
+│ ├── Dockerfile
+
+│ ├── nginx.conf
+
+│ └── html files
+
+├── mysql/
+
+│ ├── Dockerfile
+
+│ └── init.sql
+
+├── kubernetes/
+
+│ ├── backend/
+
+│ │ ├── backend-deployment.yaml
+
+│ │ └── backend-service.yaml
+
+│ ├── frontend/
+
+│ │ ├── frontend-deployment.yaml
+
+│ │ └── frontend-service.yaml
+
+│ └── mysql/
+
+│ ├── mysql-deployment.yaml
+
+│ ├── mysql-service.yaml
+
+│ └── mysql-pvc.yaml
+
+└── docker-compose.yml
 
 ---
 
-Built with 🐍 Python (Flask) + 🐬 MySQL + 🐳 Docker
+## Docker Images
+
+### Backend
+
+821263771829.dkr.ecr.eu-north-1.amazonaws.com/greenleaf-backend:latest
+
+### Frontend
+
+821263771829.dkr.ecr.eu-north-1.amazonaws.com/greenleaf-frontend:latest
+
+### MySQL
+
+821263771829.dkr.ecr.eu-north-1.amazonaws.com/greenleaf-mysql:latest
+
+---
+
+## Create EKS Cluster
+
+```bash
+eksctl create cluster \
+--name greenleaf-cluster \
+--region eu-north-1 \
+--nodegroup-name workers \
+--node-type t3.medium \
+--nodes 2
+```
+
+---
+
+## Configure kubectl
+
+```bash
+aws eks update-kubeconfig \
+--region eu-north-1 \
+--name greenleaf-cluster
+```
+
+---
+
+## Install EBS CSI Driver
+
+```bash
+eksctl utils associate-iam-oidc-provider \
+--region eu-north-1 \
+--cluster greenleaf-cluster \
+--approve
+```
+
+```bash
+eksctl create addon \
+--name aws-ebs-csi-driver \
+--cluster greenleaf-cluster \
+--region eu-north-1 \
+--force
+```
+
+---
+
+## Deploy Kubernetes Resources
+
+### MySQL
+
+```bash
+kubectl apply -f kubernetes/mysql/
+```
+
+### Backend
+
+```bash
+kubectl apply -f kubernetes/backend/
+```
+
+### Frontend
+
+```bash
+kubectl apply -f kubernetes/frontend/
+```
+
+---
+
+## Verify Deployment
+
+```bash
+kubectl get pods -n greenleaf
+```
+
+```bash
+kubectl get svc -n greenleaf
+```
+
+```bash
+kubectl get pvc -n greenleaf
+```
+
+---
+
+## Application Output
+
+Dashboard Features:
+
+- Products
+- Customers
+- Orders
+- Employees
+- Projects
+- Revenue
+
+---
+
+## Load Balancer URL
+
+```text
+http://<AWS-LoadBalancer-DNS>
+```
+
+---
+
+## Kubernetes Resources
+
+### Deployments
+
+- frontend
+- backend
+- mysql
+
+### Services
+
+- frontend-service (LoadBalancer)
+- backend-service (ClusterIP)
+- mysql-service (ClusterIP)
+
+### Storage
+
+- PersistentVolumeClaim
+- AWS EBS Volume
+
+---
+
+## Screenshots
+
+### Dashboard Successfully Running
+
+(Add project screenshots here)
+
+---
+
+## Author
+
+Bhuvanesh
+
+AWS | Docker | Kubernetes | DevOps Engineer
