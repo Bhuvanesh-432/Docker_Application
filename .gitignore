@@ -1,15 +1,14 @@
-# Docker volumes
-mysql_data/
-
-# Python
 __pycache__/
 *.pyc
-*.pyo
+
 .env
 
-# OS
-.DS_Store
-Thumbs.db
+kubeconfig
 
-# Logs
 *.log
+
+node_modules/
+
+.vscode/
+
+.idea/
