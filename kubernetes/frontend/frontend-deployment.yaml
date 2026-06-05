@@ -21,7 +21,7 @@ spec:
       containers:
       - name: frontend
 
-        image: <YOUR-ECR-URL>/greenleaf-frontend:latest
+        image: 821263771829.dkr.ecr.eu-north-1.amazonaws.com/greenleaf-frontend:latest
 
         ports:
         - containerPort: 80

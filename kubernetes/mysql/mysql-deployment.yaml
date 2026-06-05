@@ -21,7 +21,7 @@ spec:
       containers:
       - name: mysql
 
-        image: <YOUR-ECR-URL>/greenleaf-mysql:latest
+        image: 821263771829.dkr.ecr.eu-north-1.amazonaws.com/greenleaf-mysql:latest
 
         ports:
         - containerPort: 3306

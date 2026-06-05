@@ -21,7 +21,7 @@ spec:
       containers:
       - name: backend
 
-        image: <YOUR-ECR-URL>/greenleaf-backend:latest
+        image: 821263771829.dkr.ecr.eu-north-1.amazonaws.com/greenleaf-backend:latest
 
         ports:
         - containerPort: 5000
@@ -31,10 +31,10 @@ spec:
           value: mysql-service
 
         - name: DB_USER
-          value: root
+          value: gardenuser
 
         - name: DB_PASSWORD
-          value: root123
+          value: gardenpass
 
         - name: DB_NAME
-          value: greenleafdb
+          value: gardening_db
