@@ -194,7 +194,7 @@ Dashboard Features:
 ## Load Balancer URL
 
 ```text
-http://<AWS-LoadBalancer-DNS>
+http://ac5e87aaf065d4fd8b88f98e5321b2b8-205638751.eu-north-1.elb.amazonaws.com/
 ```
 
 ---
@@ -225,11 +225,10 @@ http://<AWS-LoadBalancer-DNS>
 ### Dashboard Successfully Running
 
 (Add project screenshots here)
-
 ---
 
 ## Author
 
-Bhuvanesh
+Bhuvanesh Thangaraj
 
 AWS | Docker | Kubernetes | DevOps Engineer
